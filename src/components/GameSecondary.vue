@@ -72,6 +72,7 @@ const gameSecondaryShuffleDeck = () =>
   api.get(`${gameSecondaryID.value}/shuffle/?remaining=true`)
   .then(({data})=>{
     gameSecondaryCardsRemaining.value = data.remaining;
+    flipCardSound(shuffleCards);
     console.log(data);
     toast.info("Deck Cards was shuffled", {autoClose: 3000,}); 
 });
