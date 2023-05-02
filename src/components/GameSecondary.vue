@@ -5,6 +5,8 @@ import { ref, reactive, defineProps, onMounted } from 'vue';
 import { mapActions, storeToRefs } from "pinia";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import flipCard from '../assets/sounds/flip_card.mp3'
+import shuffleCards from '../assets/sounds/shuffle_cards.mp3'
 
 const props = defineProps({
   tabId: String,
@@ -14,6 +16,12 @@ const gameSecondary = cardGamesStore();
 const {gameSecondaryID, gameSecondaryCardsRemaining, gameSecondaryDeckPile, gameSecondaryStart, gameSecondaryBestScore, gameSecondaryUserScore, gameSecondaryGameOver} = storeToRefs(gameSecondary);
 const {gameSecondaryAddCardToPile} = mapActions(cardGamesStore, ["gameSecondaryAddCardToPile"]);
 const {gameSecondaryCheckScore} = mapActions(cardGamesStore, ["gameSecondaryCheckScore"]);
+
+
+ const flipCardSound = async (cardSound) =>{ 
+    const audio = new Audio(cardSound);
+    audio.play();
+ }
 
 const gameSecondaryNewGame = () =>{
   if(gameSecondaryStart.value == false){
@@ -29,8 +37,6 @@ const gameSecondaryResetGame = () => {
   gameSecondaryDeckPile.value = [];
   gameSecondaryGameOver.value = false;
   gameSecondaryUserScore.value = 0;
-  
-
 }
 
 const gameSecondaryNewDeck = () => 
@@ -38,6 +44,7 @@ const gameSecondaryNewDeck = () =>
   .then(({data})=>{
     gameSecondaryCardsRemaining.value = data.remaining;
     gameSecondaryID.value = data.deck_id;
+    flipCardSound(shuffleCards);
     console.log(data);
 });
 
@@ -47,6 +54,7 @@ const gameSecondaryAddCardOnPile = () => {
     .then(({data})=>{
       gameSecondaryCardsRemaining.value = data.remaining;
       const card = data['cards'][0].code;
+      flipCardSound(flipCard);
 
       if(card != 'QS'){
         gameSecondaryUserScore.value++;
@@ -90,6 +98,7 @@ onMounted(gameSecondaryNewGame);
             <button type="button" class="btn btn-sm btn-info" :class="gameSecondaryCardsRemaining == 0 ? 'disabled' : ''" @click="gameSecondaryShuffleDeck">Shuffle Deck</button>
             <button type="button" class="btn btn-sm btn-warning ms-2" :class="gameSecondaryCardsRemaining > 50 ? 'disabled' : ''" @click="gameSecondaryShufflePileDeck">Shuffle Pile Deck</button>
             <button type="button" class="btn btn-sm btn-danger ms-2" @click="gameSecondaryResetGame">New Game</button>
+            <button type="button" class="btn btn-sm btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#gameSecondaryRules">Rules</button>
             </div>
             <p class="text-white mt-3">Click on the deck to draw a card and place it on the pile</p>
           </div>
@@ -103,6 +112,20 @@ onMounted(gameSecondaryNewGame);
           </div>
           <div class="col-6 col-md-2 mt-4 cardBounce" v-for="card in gameSecondaryDeckPile" :key="card">
             <img :src="card.image" class="card-image">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Rules -->
+    <div class="modal fade" id="gameSecondaryRules" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Game Secondary - Rules</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Remove as many cards from the deck as possible. If you draw the queen of spades, you lose.
           </div>
         </div>
       </div>

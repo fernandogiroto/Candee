@@ -5,10 +5,17 @@ import { ref, reactive, defineProps, onMounted } from 'vue';
 import { mapActions, storeToRefs } from "pinia";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import flipCard from '../assets/sounds/flip_card.mp3'
+import shuffleCards from '../assets/sounds/shuffle_cards.mp3'
 
 const props = defineProps({
   tabId: String,
 });
+
+ const flipCardSound = async (cardSound) =>{ 
+    const audio = new Audio(cardSound);
+    audio.play();
+ }
 
 const gamePrimary = cardGamesStore();
 const {gamePrimaryID, gamePrimaryCardsRemaining, gamePrimaryDeckPile, gamePrimaryStart} = storeToRefs(gamePrimary);
@@ -31,6 +38,7 @@ const gamePrimaryNewDeck = () =>
   .then(({data})=>{
     gamePrimaryCardsRemaining.value = data.remaining;
     gamePrimaryID.value = data.deck_id;
+    flipCardSound(shuffleCards);
     console.log(data);
 });
 
@@ -40,7 +48,9 @@ const gamePrimaryAddCardOnPile = () => {
     .then(({data})=>{
       gamePrimaryCardsRemaining.value = data.remaining;
       console.log(data['cards']);
+      flipCardSound(flipCard);
       gamePrimary.gamePrimaryAddCardToPile(...data['cards']);
+      
     });
   }else{
     console.log("No more cards");
@@ -52,6 +62,7 @@ const gamePrimaryShuffleDeck = () =>
   .then(({data})=>{
     gamePrimaryCardsRemaining.value = data.remaining;
     console.log(data);
+    flipCardSound(shuffleCards);
     toast.info("Deck Cards was shuffled", {autoClose: 3000,}); 
 });
 
